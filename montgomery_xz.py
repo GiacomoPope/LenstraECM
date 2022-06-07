@@ -84,13 +84,62 @@ def xDBLADD(P, Q, PQ, E):
 
     return (X2P, Z2P), (XPQ, ZPQ)
 
+def xDBLADD_normalised(P, Q, PQx, E):
+    """
+    SIKE Specification Alg. 5
+    https://sike.org/files/SIDH-spec.pdf
+
+    6 Mult, 4 Sqaure, 8 Add
+    """
+    N, _, A24 = E
+    (PX, PZ), (QX, QZ) = P, Q
+
+    t0  = PX + PZ
+    t1  = PX - PZ
+    XPQ = QX + QZ
+    t2  = QX - QZ
+    X2P = t0 * t0
+    t0  = t0 * t2
+    Z2P = t1 * t1
+    t1  = t1 * XPQ
+    t2  = X2P - Z2P
+    X2P = X2P * Z2P
+    XPQ = A24 * t2
+    ZPQ = t0 - t1
+    Z2P = XPQ + Z2P
+    XPQ = t0 + t1
+    Z2P = Z2P * t2
+    ZPQ = ZPQ * ZPQ
+    XPQ = XPQ * XPQ
+    # Normalised means we save 1 Mul
+    ZPQ = PQx * ZPQ
+    # XPQ = 1 * XPQ
+
+    X2P = X2P % N
+    Z2P = Z2P % N
+    XPQ = XPQ % N
+    ZPQ = ZPQ % N
+
+    return (X2P, Z2P), (XPQ, ZPQ)
+
 def xMUL(P, n, E):
     if n == 0:
         return (0, 0)
     R0, R1 = P, xDBL(P, E)
-    for i in range(n.bit_length() - 2, -1, -1):
-        if n & (1 << i) == 0:
+    for i in bin(n)[3:]:
+        if i == "0":
             R0, R1 = xDBLADD(R0, R1, P, E)
         else:
-            R1, R0 = xDBLADD(R0, R1, P, E)
+            R1, R0 = xDBLADD(R1, R0, P, E)
+    return R0
+
+def xMUL_normalised(P, n, E):
+    if n == 0:
+        return (0, 0)
+    R0, R1, Px = P, xDBL(P, E), P[0]
+    for i in bin(n)[3:]:
+        if i == '0':
+            R0, R1 = xDBLADD_normalised(R0, R1, Px, E)
+        else:
+            R1, R0 = xDBLADD_normalised(R1, R0, Px, E)
     return R0

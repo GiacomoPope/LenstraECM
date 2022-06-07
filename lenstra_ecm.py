@@ -89,14 +89,25 @@ def lenstra_ecm(N, factor_digits=20):
     for _ in range(num_curves):
         # Stage One
         # Multiply the found point Q by a
-        # B1 power-smooth integer 
+        # B1 power-smooth integer
         E, Q = find_curve(N)        
         for pa in stage_one_prime_powers:
-            Q = xMUL(Q, pa, E)
-        # Lucky? if 1 < gcd(Q.Z, N) < N
-        # we have a factor
-        g = gcd(Q[1], N)
-        if 1 < g < N: return g
+            """
+            Here we differ from Pomerance by computing
+            a single inversion at each step, which allows
+            us to save 1 multiplication in each xDBLADD
+            which means we save ~log_2(B1) mul for each xMUL
+
+            As long as inversion is less that 14 Mul, we save
+            time!
+            """
+            QX, QZ = xMUL_normalised(Q, pa, E)
+            try:
+                QZ_inv = pow(QZ, -1, N)
+            except:
+                # We got lucky and found a factor!
+                return gcd(QZ, N)
+            Q = (QX * QZ_inv % N, 1)
 
         # Stage Two
         # Let's look for a factor B1 < p < B2
