@@ -63,7 +63,7 @@ Thoughts:
 - Rather than implementing all of this in Rust/C, would there be too much FFI overhead to shift the group operations into C and then hook these back into Python?
 
 
-## GMP ECM
+## GMP-ECM
 
 GMP-ECM is a highly optimised implementation of Lenstra's ECM factoring algorithm written by Paul Zimmerman and friends. It should without doubt be used instead of what I have written myself.
 
