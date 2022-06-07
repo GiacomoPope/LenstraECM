@@ -1,6 +1,10 @@
 # Lenstra ECM
 
-Implmentation of Lenstra's ECM factorisation algorithm following Pomerance's "Prime Numbers: A Computational Perspective", Algorithm 7.4.4 (Inversionless ECM). 
+Implmentation of Lenstra's ECM factorisation algorithm following Pomerance's "Prime Numbers: A Computational Perspective", Algorithm 7.4.4 (Inversionless ECM).
+
+Keen to improve this, so if you see something I should be doing differently throw some references my way.
+
+The library relies on `gmpy2` to make modular arithmetic "fast", and a `primesieve` package for finding primes. The latter could probably be reasonably switched out with a pure python, or numpy prime sieve, but this is fast and I had it pip installed already from my work on Class Groups.
 
 ## ECM Factoring
 
@@ -58,3 +62,31 @@ Thoughts:
 - I currently don't have any check that $N \neq x^k$. Perfect powers could be tested after trial division and before ECM?
 - Rather than implementing all of this in Rust/C, would there be too much FFI overhead to shift the group operations into C and then hook these back into Python?
 
+
+## GMP ECM
+
+GMP-ECM is a highly optimised implementation of Lenstra's ECM factoring algorithm written by Paul Zimmerman and friends. It should without doubt be used instead of what I have written myself.
+
+You can view the code in the [Inria GitLab](https://gitlab.inria.fr/zimmerma/ecm) and read a wonderful document about how it works here: [20 years of ECM, Paul Zimmermann](https://hal.inria.fr/inria-00070192v1/document). 
+
+You can either build the binary yourself, or if you have SageMath to hand, there's bindings for it already!
+
+```py
+sage: time ecm.factor(N)                                                                                                
+CPU times: user 12.5 ms, sys: 49.5 ms, total: 62.1 ms
+Wall time: 172 ms
+[11,
+ 44756014201,
+ 106325369477,
+ 151534339807,
+ 152491468939,
+ 240123516443,
+ 392888992271,
+ 534771852913,
+ 913899456083,
+ 978212965549,
+ 981758150279,
+ 39431643547271]
+ ```
+
+ Then, if you're me, write a README.md for your factoring project and try not to compare the CPU time of GMP-ECM with your own implementation... Maybe, just blame python for being slow.
