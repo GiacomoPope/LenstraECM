@@ -10,24 +10,27 @@ def factor(n):
         elif is_prime(N):
             factors[int(N)] = 1
             break
-        # This isn't ensured to be
-        # prime... should fix this...
-        factor = lenstra_ecm(N)
-        if factor == 0:
+        q = lenstra_ecm(N)
+        if q == 0:
             print(f"No factor found, increasing bounds")
             factor_digits = int(len(str(N)) / 10) * 5
             factor_digits = max(factor_digits, 25)
-            factor = lenstra_ecm(N, factor_digits=factor_digits)
-            if factor == 0:
+            q = lenstra_ecm(N, factor_digits=factor_digits)
+            if q == 0:
                 print(f"No factor found, giving up...")
                 print(f"Remaining composite: {N=}")
                 return factors
-        while N % factor == 0:
-            if factor in factors:
-                factors[int(factor)] += 1
-            else:
-                factors[int(factor)] = 1
-            N //= factor
+        if not is_prime(q):
+            sub_factors = factor(q)
+            factors = factors | sub_factors
+            N //= q
+        else:
+            while N % q == 0:
+                if q in factors:
+                    factors[int(q)] += 1
+                else:
+                    factors[int(q)] = 1
+                N //= q
     return factors
 
 if __name__ == '__main__':
