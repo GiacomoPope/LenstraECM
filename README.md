@@ -12,6 +12,10 @@ The library relies on `gmpy2` to make modular arithmetic "fast", and a `primesie
 
 Maybe I could use the nice Latex support GitHub now has to give an overview of how this algorithm works... :eyes:
 
+Calling `factor(N)` from `factor.py` first looks for small prime factors (`trial_division.py`) and then uses ECM factoring for remaining factors. The interesting code is in `lenstra_ecm.py`. Work should be done to better handle when `lenstra_ecm(N)` finds no factor. At the moment when no factor is found it tries one more time with larger bounds, then just gives up. Not so stylish...
+
+If you wanted to use this yourself, then `import factor from factor` should just work, and the output is a dictionary of primes and exponents.
+
 ## cProfile
 
 Running `cProfile` very clearly shows that the bulk of the computation happens in performing `xDBLADD`. Below is the output when factoring the 130 digit integer
