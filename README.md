@@ -7,9 +7,9 @@ This implementation differ's from Pomerance in two ways:
 - In Stage One I perform a single inversion for each prime below the bound $B_1$, this allows me to normalise the curve point $Q = (X : 1)$ to save one multiplication in `xDBLADD` which is called approx $\log_2(B_1)$ times for each `xMUL`. For the default of `B1 = 11_000`, this is fourteen saved multiplications
 - I include a primality test on a factor found by ECM and further factorise if it is probably composite.
 
-I also have a "pre-factorisation" stage, where I furst use trial division and then check with the remaining integer is a perfect square. ECM cannot factor integers which are perfect squares.
+I also have a "pre-factorisation" stage, where I first use trial division and then check with the remaining integer is a perfect square. ECM cannot factor integers which are perfect squares.
 
-Keen to improve this, so if you see something I should be doing differently throw some references my way.
+I'm keen to improve this, so if you see something I should be doing differently throw some references my way.
 
 The library relies on `gmpy2` to make modular arithmetic "fast", and a `primesieve` package for finding primes. The latter could probably be reasonably switched out with a pure python, or numpy prime sieve, but this is fast and I had it pip installed already from my work on Class Groups.
 
