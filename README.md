@@ -2,6 +2,13 @@
 
 Implmentation of Lenstra's ECM factorisation algorithm following Pomerance's "Prime Numbers: A Computational Perspective", Algorithm 7.4.4 (Inversionless ECM).
 
+This implementation differ's from Pomerance in two ways:
+
+- In Stage One I perform a single inversion for each prime below the bound $B_1$, this allows me to normalise the curve point $Q = (X : 1)$ to save one multiplication in `xDBLADD` which is called approx $\log_2(B_1)$ times for each `xMUL`. For the default of `B1 = 11_000`, this is fourteen saved multiplications
+- I include a primality test on a factor found by ECM and further factorise if it is probably composite.
+
+I also have a "pre-factorisation" stage, where I furst use trial division and then check with the remaining integer is a perfect square. ECM cannot factor integers which are perfect squares.
+
 Keen to improve this, so if you see something I should be doing differently throw some references my way.
 
 The library relies on `gmpy2` to make modular arithmetic "fast", and a `primesieve` package for finding primes. The latter could probably be reasonably switched out with a pure python, or numpy prime sieve, but this is fast and I had it pip installed already from my work on Class Groups.
@@ -12,7 +19,7 @@ The library relies on `gmpy2` to make modular arithmetic "fast", and a `primesie
 
 Maybe I could use the nice Latex support GitHub now has to give an overview of how this algorithm works... :eyes:
 
-Calling `factor(N)` from `factor.py` first looks for small prime factors (`trial_division.py`) and then uses ECM factoring for remaining factors. The interesting code is in `lenstra_ecm.py`. Work should be done to better handle when `lenstra_ecm(N)` finds no factor. At the moment when no factor is found it tries one more time with larger bounds, then just gives up. Not so stylish...
+Calling `factor(N)` from `factor.py` first looks for small prime factors (`trial_division.py`). Then, the integer is checked to be a perfect power with `gmpy2` `is_power()`. When this evaluates to `True`, we take the $k$th root with `perfect_power.py`. After these two initial pre-computations, the composite number is attempted to be factored using ECM. The interesting code is in `lenstra_ecm.py`. Work should be done to better handle when `lenstra_ecm(N)` finds no factor. At the moment when no factor is found it tries one more time with larger bounds, then just gives up. Not so stylish...
 
 If you wanted to use this yourself, then `import factor from factor` should just work, and the output is a dictionary of primes and exponents.
 
@@ -71,7 +78,6 @@ Thoughts:
 - Would implementing Montgomery Arithmetic for `xDBLADD` speed it up, or slow it down due to the overhead? 11 Multiplications isn't so much...
 - Zimmerman has a very different approach for Stage Two, which *also* uses affine coordinates for Stage Two. I need to learn how this works, implement and then compare. Currently Stage One is much shorter than Stage Two, and from the literature I think bounds should be balanced so they take approximately the same time?
 - Would be nice to include a $P-1$ factoring if ECM fails, just incase we get lucky
-- I currently don't have any check that $N \neq x^k$. Perfect powers could be tested after trial division and before ECM?
 - Rather than implementing all of this in Rust/C, would there be too much FFI overhead to shift the group operations into C and then hook these back into Python?
 
 
